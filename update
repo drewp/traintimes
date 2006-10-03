@@ -1,7 +1,9 @@
 #!/usr/bin/python
 import urllib, time, datetime, pprint, pickle, os
 import TableParse
-
+import kid
+kid.enable_import()
+import page
 
 def todayDateTime(s):
     """given '4:06 pm', returns a datetime on today"""
@@ -27,7 +29,7 @@ xwdf_SortBy=sessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D%2Ftri
 _handler%3Damtrak.presentation.handler.request.rail.AmtrakRailTrainStatusSearchRequestHandler%2F_xpath%3DsessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D.x=59
 _handler%3Damtrak.presentation.handler.request.rail.AmtrakRailTrainStatusSearchRequestHandler%2F_xpath%3DsessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D.y=21""").splitlines())).read()
 
-    print "read train %s in %.3f seconds" % (trainNumber, time.time() - t1)
+    #print "read train %s in %.3f seconds" % (trainNumber, time.time() - t1)
 
     cells = TableParse.parse(result)
     #pprint.pprint(list(enumerate( cells)))
@@ -43,61 +45,13 @@ _handler%3Damtrak.presentation.handler.request.rail.AmtrakRailTrainStatusSearchR
         isEstimate = False
 
     note = cells[34][6]
-
-
     return scheduled, actual, isEstimate, note
 
 def trainDatFile(trainNumber):
     return os.path.join(os.path.dirname(__file__), "data/train-%s.dat" % trainNumber)
 
-out = open(os.path.join(os.path.dirname(__file__), "index.html.new"), "w")
-now = datetime.datetime.now()
-today = datetime.date.today()
-print >>out, """
-<html>
-<head>
- <title>Today's train times</title>
-</head>
-<style type="text/css">
-table.sample {
-	border-width: 1px 1px 1px 1px;
-	border-spacing: 2px;
-	border-style: outset outset outset outset;
-	border-color: gray gray gray gray;
-	border-collapse: collapse;
-	background-color: white;
-}
-table.sample th {
-	border-width: 1px 1px 1px 1px;
-	padding: 3px 3px 3px 3px;
-	border-style: inset inset inset inset;
-	border-color: gray gray gray gray;
-	background-color: #cccccc;
-	-moz-border-radius: 0px 0px 0px 0px;
-}
-table.sample td {
-	border-width: 1px 1px 1px 1px;
-	padding: 3px 3px 3px 3px;
-	border-style: inset inset inset inset;
-	border-color: gray gray gray gray;
-	-moz-border-radius: 0px 0px 0px 0px;
-}
-</style>
-<body>
-<p><i>Last scan at %(now)s</i></p>
-
-<p>Data from <a href="http://tickets.amtrak.com/itd/amtrak">Amtrak</a></p>
-
-<p>Times are on %(today)s</p>
-
-<table class="sample" border="1">
-<tr>
- <th>Train number</th>
- <th>Scheduled</th>
- <th>Actual / Estimated</th>
- <th>Note</th> 
-</tr>
-""" % vars()
+page.now = datetime.datetime.now()
+page.today = datetime.date.today()
 
 NOT_RUNNING = datetime.datetime.today().replace(hour=0, minute=1, second=0, microsecond=0)
 
@@ -107,7 +61,6 @@ for name, trainNumber in (
      for x in "521 523 525 527 529 531 533 535 537 541 543 545 547 549 551 553 723 727 729 733 737 741 743 745 747 749 751 720 724 728 732 734 736 738 742 744 746 748 518 520 522 524 526 528 530 532 534 536 538 540 542 544 546 548".split()] +
     [("San Joaquin", x) for x in "711 701 713 715 717 703 702 712 714 716 704 718".split()] +
     [("Coast Starlight", x) for x in "11 14".split()]):
-    print
     try:
         scheduled, actual, isEstimate, note = pickle.load(open(trainDatFile(trainNumber)))
         needFetch = False
@@ -118,8 +71,8 @@ for name, trainNumber in (
         if scheduled.date() != datetime.date.today():
             needFetch = True
         untilScheduled = scheduled - datetime.datetime.now()
-        if datetime.timedelta() < untilScheduled < datetime.timedelta(hours=1):
-            print "%s arrives within one hour (%s)" % (trainNumber, untilScheduled)
+        if datetime.timedelta(minutes=-32) < untilScheduled < datetime.timedelta(hours=1):
+            #print "%s arrives within one hour (%s)" % (trainNumber, untilScheduled)
             needFetch = True
         
     if needFetch:
@@ -128,7 +81,7 @@ for name, trainNumber in (
         except IndexError:
             scheduled, actual, isEstimate, note = NOT_RUNNING, None, False, None
 
-    print "train %s scheduled %s %s, arrives %s (%s)" % (trainNumber, scheduled, ('true', 'estd')[isEstimate], actual, note)
+    #print "train %s scheduled %s %s, arrives %s (%s)" % (trainNumber, scheduled, ('true', 'estd')[isEstimate], actual, note)
 
     if not scheduled:
         try:
@@ -144,7 +97,7 @@ for name, trainNumber in (
     <tr>
      <td>%(trainNumber)s %(name)s</td>
      <td><nobr>%(scheduledTime)s</nobr></td>
-     <td><nobr>%(actualTime)s</nobr></td>
+     <td bgcolor="#EDEAD0"><nobr>%(actualTime)s</nobr></td>
      <td>%(note)s</td>
     </tr>
         """ % vars()))
@@ -153,17 +106,15 @@ for name, trainNumber in (
 
 rows.sort()
 printedNowBar = False
+page.rowSection = ""
 for t, row in rows:
     if not printedNowBar and t > datetime.datetime.now():
-        print >>out, """<tr><td colspan="4" align="center" bgcolor="#D88585">now</td></tr>"""
+        page.rowSection += """<tr><td colspan="4" align="center" bgcolor="#D88585">now</td></tr>"""
         printedNowBar = True
-    print >>out, row
+    page.rowSection += row
 
-print >>out, """
-</table>
-</body>
-</html>
-"""
-
+out = open(os.path.join(os.path.dirname(__file__), "index.html.new"), "w")
+print >>out, page.serialize(output="html-strict")
 out.close()
 os.rename(os.path.join(os.path.dirname(__file__), "index.html.new"), os.path.join(os.path.dirname(__file__), "index.html"))
+
