@@ -2,6 +2,7 @@
 import urllib, time, datetime, pprint, pickle, os
 import TableParse
 
+
 def todayDateTime(s):
     """given '4:06 pm', returns a datetime on today"""
     t = datetime.datetime(*time.strptime(s, "%I:%M %p")[0:6])
@@ -31,9 +32,9 @@ _handler%3Damtrak.presentation.handler.request.rail.AmtrakRailTrainStatusSearchR
     cells = TableParse.parse(result)
     #pprint.pprint(list(enumerate( cells)))
 
-    scheduled = todayDateTime(cells[34][2].splitlines()[0])
+    scheduled = todayDateTime((cells[34][2] or cells[34][3]).splitlines()[0])
 
-    actualCell = cells[34][4]
+    actualCell = (cells[34][4] or cells[34][5])
     if actualCell:
         actual = todayDateTime(actualCell.splitlines()[0].replace('(','').replace(')',''))
         isEstimate = 'estimated' in actualCell
@@ -47,9 +48,9 @@ _handler%3Damtrak.presentation.handler.request.rail.AmtrakRailTrainStatusSearchR
     return scheduled, actual, isEstimate, note
 
 def trainDatFile(trainNumber):
-    return "data/train-%s.dat" % trainNumber
+    return os.path.join(os.path.dirname(__file__), "data/train-%s.dat" % trainNumber)
 
-out = open("index.html.new", "w")
+out = open(os.path.join(os.path.dirname(__file__), "index.html.new"), "w")
 now = datetime.datetime.now()
 today = datetime.date.today()
 print >>out, """
@@ -165,4 +166,4 @@ print >>out, """
 """
 
 out.close()
-os.rename("index.html.new", "index.html")
+os.rename(os.path.join(os.path.dirname(__file__), "index.html.new"), os.path.join(os.path.dirname(__file__), "index.html"))
