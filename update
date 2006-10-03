@@ -70,7 +70,7 @@ for name, trainNumber in (
     if not needFetch:
         if scheduled.date() != datetime.date.today():
             needFetch = True
-        untilScheduled = scheduled - datetime.datetime.now()
+        untilScheduled = (actual or scheduled) - datetime.datetime.now()
         if datetime.timedelta(minutes=-32) < untilScheduled < datetime.timedelta(hours=1):
             #print "%s arrives within one hour (%s)" % (trainNumber, untilScheduled)
             needFetch = True
