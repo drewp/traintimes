@@ -1,0 +1,168 @@
+#!/usr/bin/python
+import urllib, time, datetime, pprint, pickle, os
+import TableParse
+
+def todayDateTime(s):
+    """given '4:06 pm', returns a datetime on today"""
+    t = datetime.datetime(*time.strptime(s, "%I:%M %p")[0:6])
+    return datetime.datetime.combine(datetime.date.today(), t.timetz())
+    
+def fetchTrainInfo(trainNumber):
+    today = datetime.date.today()
+    t1 = time.time()
+    result = urllib.urlopen("&".join(("""http://tickets.amtrak.com/itd/amtrak?requestor=amtrak.presentation.handler.page.rail.AmtrakRailGetTrainStatusPageHandler
+xwdf_origin=sessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D%2FtravelSelection%2FjourneySelection%5B1%5D%2FdepartLocation%2Fsearch
+wdf_origin=
+xwdf_trainNumber=sessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D%2FtripRequirements%2FjourneyRequirements%5B1%5D%2FsegmentRequirements%5B1%5D%2FserviceCode
+wdf_trainNumber="""+trainNumber+"""
+xwdf_destination=sessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D%2FtravelSelection%2FjourneySelection%5B1%5D%2FarriveLocation%2Fsearch
+wdf_destination=Oakland+-+Jack+London+Sq%2C+CA+%28OKJ%29
+%2FsessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D%2FtripRequirements%2FjourneyRequirements%5B1%5D%2FdepartDate.monthyear="""+("%04d-%02d" % (today.year, today.month))+"""
+%2FsessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D%2FtripRequirements%2FjourneyRequirements%5B1%5D%2FdepartDate.day="""+("%02d" % today.day)+"""
+%2FsessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D%2FtripRequirements%2FjourneyRequirements%5B1%5D%2FdepartTime.hourmin=
+xwdf_SortBy=sessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D%2FtripRequirements%2FjourneyRequirements%5B1%5D%2FdepartDate%2F%40radioSelect
+wdf_SortBy=arrivalTime
+xwdf_SortBy=sessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D%2FtripRequirements%2FjourneyRequirements%5B1%5D%2FdepartDate%2F%40radioSelect
+_handler%3Damtrak.presentation.handler.request.rail.AmtrakRailTrainStatusSearchRequestHandler%2F_xpath%3DsessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D.x=59
+_handler%3Damtrak.presentation.handler.request.rail.AmtrakRailTrainStatusSearchRequestHandler%2F_xpath%3DsessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D.y=21""").splitlines())).read()
+
+    print "read train %s in %.3f seconds" % (trainNumber, time.time() - t1)
+
+    cells = TableParse.parse(result)
+    #pprint.pprint(list(enumerate( cells)))
+
+    scheduled = todayDateTime(cells[34][2].splitlines()[0])
+
+    actualCell = cells[34][4]
+    if actualCell:
+        actual = todayDateTime(actualCell.splitlines()[0].replace('(','').replace(')',''))
+        isEstimate = 'estimated' in actualCell
+    else:
+        actual = None
+        isEstimate = False
+
+    note = cells[34][6]
+
+
+    return scheduled, actual, isEstimate, note
+
+def trainDatFile(trainNumber):
+    return "data/train-%s.dat" % trainNumber
+
+out = open("index.html.new", "w")
+now = datetime.datetime.now()
+today = datetime.date.today()
+print >>out, """
+<html>
+<head>
+ <title>Today's train times</title>
+</head>
+<style type="text/css">
+table.sample {
+	border-width: 1px 1px 1px 1px;
+	border-spacing: 2px;
+	border-style: outset outset outset outset;
+	border-color: gray gray gray gray;
+	border-collapse: collapse;
+	background-color: white;
+}
+table.sample th {
+	border-width: 1px 1px 1px 1px;
+	padding: 3px 3px 3px 3px;
+	border-style: inset inset inset inset;
+	border-color: gray gray gray gray;
+	background-color: #cccccc;
+	-moz-border-radius: 0px 0px 0px 0px;
+}
+table.sample td {
+	border-width: 1px 1px 1px 1px;
+	padding: 3px 3px 3px 3px;
+	border-style: inset inset inset inset;
+	border-color: gray gray gray gray;
+	-moz-border-radius: 0px 0px 0px 0px;
+}
+</style>
+<body>
+<p><i>Last scan at %(now)s</i></p>
+
+<p>Data from <a href="http://tickets.amtrak.com/itd/amtrak">Amtrak</a></p>
+
+<p>Times are on %(today)s</p>
+
+<table class="sample" border="1">
+<tr>
+ <th>Train number</th>
+ <th>Scheduled</th>
+ <th>Actual / Estimated</th>
+ <th>Note</th> 
+</tr>
+""" % vars()
+
+NOT_RUNNING = datetime.datetime.today().replace(hour=0, minute=1, second=0, microsecond=0)
+
+rows = [] # sorttime, tr
+for name, trainNumber in (
+    [("Capitol", x)
+     for x in "521 523 525 527 529 531 533 535 537 541 543 545 547 549 551 553 723 727 729 733 737 741 743 745 747 749 751 720 724 728 732 734 736 738 742 744 746 748 518 520 522 524 526 528 530 532 534 536 538 540 542 544 546 548".split()] +
+    [("San Joaquin", x) for x in "711 701 713 715 717 703 702 712 714 716 704 718".split()] +
+    [("Coast Starlight", x) for x in "11 14".split()]):
+    print
+    try:
+        scheduled, actual, isEstimate, note = pickle.load(open(trainDatFile(trainNumber)))
+        needFetch = False
+    except IOError:
+        needFetch = True
+
+    if not needFetch:
+        if scheduled.date() != datetime.date.today():
+            needFetch = True
+        untilScheduled = scheduled - datetime.datetime.now()
+        if datetime.timedelta() < untilScheduled < datetime.timedelta(hours=1):
+            print "%s arrives within one hour (%s)" % (trainNumber, untilScheduled)
+            needFetch = True
+        
+    if needFetch:
+        try:
+            scheduled, actual, isEstimate, note = fetchTrainInfo(trainNumber)
+        except IndexError:
+            scheduled, actual, isEstimate, note = NOT_RUNNING, None, False, None
+
+    print "train %s scheduled %s %s, arrives %s (%s)" % (trainNumber, scheduled, ('true', 'estd')[isEstimate], actual, note)
+
+    if not scheduled:
+        try:
+            os.remove(trainDatFile(trainNumber))
+        except OSError:
+            pass
+        continue
+
+    if scheduled != NOT_RUNNING:
+        scheduledTime = scheduled.time()
+        actualTime = actual and actual.time()
+        rows.append((actual or scheduled, """
+    <tr>
+     <td>%(trainNumber)s %(name)s</td>
+     <td><nobr>%(scheduledTime)s</nobr></td>
+     <td><nobr>%(actualTime)s</nobr></td>
+     <td>%(note)s</td>
+    </tr>
+        """ % vars()))
+
+    pickle.dump((scheduled, actual, isEstimate, note), open(trainDatFile(trainNumber), "w"))
+
+rows.sort()
+printedNowBar = False
+for t, row in rows:
+    if not printedNowBar and t > datetime.datetime.now():
+        print >>out, """<tr><td colspan="4" align="center" bgcolor="#D88585">now</td></tr>"""
+        printedNowBar = True
+    print >>out, row
+
+print >>out, """
+</table>
+</body>
+</html>
+"""
+
+out.close()
+os.rename("index.html.new", "index.html")
