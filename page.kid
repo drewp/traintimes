@@ -25,6 +25,7 @@ table.sample td {
 	border-style: inset inset inset inset;
 	border-color: gray gray gray gray;
 	-moz-border-radius: 0px 0px 0px 0px;
+        font-family: sans-serif;
 }
 </style>
 <body>

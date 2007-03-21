@@ -18,7 +18,7 @@ xwdf_origin=sessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D%2Ftra
 wdf_origin=
 xwdf_trainNumber=sessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D%2FtripRequirements%2FjourneyRequirements%5B1%5D%2FsegmentRequirements%5B1%5D%2FserviceCode
 wdf_trainNumber="""+trainNumber+"""
-xwdf_destination=sessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D%2FtravelSelection%2FjourneySelection%5B1%5D%2FarriveLocation%2Fsearch
+xwdf_destination=sessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D%2FtravelSelection%2FjourneySelection%5B1%5D%2FdepartLocation%2Fsearch
 wdf_destination=Oakland+-+Jack+London+Sq%2C+CA+%28OKJ%29
 %2FsessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D%2FtripRequirements%2FjourneyRequirements%5B1%5D%2FdepartDate.monthyear="""+("%04d-%02d" % (today.year, today.month))+"""
 %2FsessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D%2FtripRequirements%2FjourneyRequirements%5B1%5D%2FdepartDate.day="""+("%02d" % today.day)+"""
@@ -93,9 +93,12 @@ for name, trainNumber in (
     if scheduled != NOT_RUNNING:
         scheduledTime = scheduled.time()
         actualTime = actual and actual.time()
+        if note.startswith("The scheduled ") and note.endswith("Presently, no further information is available. Please check back later for updated information."):
+            note = "[no further info]"
+        
         rows.append((actual or scheduled, """
     <tr>
-     <td>%(trainNumber)s %(name)s</td>
+     <td><nobr>%(trainNumber)s %(name)s</nobr></td>
      <td><nobr>%(scheduledTime)s</nobr></td>
      <td bgcolor="#EDEAD0"><nobr>%(actualTime)s</nobr></td>
      <td>%(note)s</td>
