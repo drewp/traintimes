@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import urllib, time, datetime, pprint, pickle, os
+import urllib, time, datetime, pprint, pickle, os, cgitb
 import TableParse
 import kid
 kid.enable_import()
@@ -33,10 +33,11 @@ _handler%3Damtrak.presentation.handler.request.rail.AmtrakRailTrainStatusSearchR
 
     cells = TableParse.parse(result)
     #pprint.pprint(list(enumerate( cells)))
+    tableNum = 35
 
-    scheduled = todayDateTime((cells[34][2] or cells[34][3]).splitlines()[0])
+    scheduled = todayDateTime((cells[tableNum][2] or cells[tableNum][3]).splitlines()[0])
 
-    actualCell = (cells[34][4] or cells[34][5])
+    actualCell = (cells[tableNum][4] or cells[tableNum][5])
     if actualCell:
         actual = todayDateTime(actualCell.splitlines()[0].replace('(','').replace(')',''))
         isEstimate = 'estimated' in actualCell
@@ -44,11 +45,15 @@ _handler%3Damtrak.presentation.handler.request.rail.AmtrakRailTrainStatusSearchR
         actual = None
         isEstimate = False
 
-    note = cells[34][6]
+    note = cells[tableNum][6]
     return scheduled, actual, isEstimate, note
 
 def trainDatFile(trainNumber):
     return os.path.join(os.path.dirname(__file__), "data/train-%s.dat" % trainNumber)
+
+
+cgitb.enable(format='txt')
+
 
 page.now = datetime.datetime.now()
 page.today = datetime.date.today()
