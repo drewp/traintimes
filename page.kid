@@ -1,6 +1,6 @@
 <html>
 <head>
- <title>Today's train times</title>
+ <title>Today's train times at Jack London Square</title>
 </head>
 <style type="text/css">
 table.sample {
@@ -27,8 +27,16 @@ table.sample td {
 	-moz-border-radius: 0px 0px 0px 0px;
         font-family: sans-serif;
 }
+div.notice {
+ margin: 1em;
+ padding: .5em;
+ font-size: 70%;
+ border: 1px solid #ddd;
+ 
+}
 </style>
 <body>
+<h1>Today's train times at Jack London Square</h1>
 <p><i>Last scan at ${now}</i></p>
 
 <p>Data from <a href="http://tickets.amtrak.com/itd/amtrak">Amtrak</a></p>
@@ -44,5 +52,13 @@ table.sample td {
 </tr>
 ${XML(rowSection)}
 </table>
+
+<div class="notice">
+This is an automated site using information from Amtrak at <a href="http://tickets.amtrak.com/itd/amtrak">this search page</a>. We can't be
+held responsible for the information they provide us. This page 
+may not work all the time and may disappear completely
+without notice. Please send comments to traintimes@bigasterisk.com
+</div>
+
 </body>
 </html>
