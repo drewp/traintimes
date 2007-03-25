@@ -1,5 +1,12 @@
 #!/usr/bin/python
-import urllib, time, datetime, pprint, pickle, os, cgitb
+"""
+2007-03-25 We had a problem where on Sundays all the trains would get
+marked invalid. Hoping that's an amtrak fault, I shifted the crontab
+to run at minute 5 instead of minute 0. If it still doesn't fix, we probably need more smarts about when to retry trains that seemed to be down for the day.
+
+
+"""
+import logging, optparse, urllib, time, datetime, pprint, pickle, os, cgitb
 import TableParse
 import kid
 kid.enable_import()
@@ -29,7 +36,7 @@ xwdf_SortBy=sessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D%2Ftri
 _handler%3Damtrak.presentation.handler.request.rail.AmtrakRailTrainStatusSearchRequestHandler%2F_xpath%3DsessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D.x=59
 _handler%3Damtrak.presentation.handler.request.rail.AmtrakRailTrainStatusSearchRequestHandler%2F_xpath%3DsessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D.y=21""").splitlines())).read()
 
-    #print "read train %s in %.3f seconds" % (trainNumber, time.time() - t1)
+    log.debug("read train %s in %.3f seconds" % (trainNumber, time.time() - t1))
 
     cells = TableParse.parse(result)
     #pprint.pprint(list(enumerate( cells)))
@@ -52,8 +59,16 @@ def trainDatFile(trainNumber):
     return os.path.join(os.path.dirname(__file__), "data/train-%s.dat" % trainNumber)
 
 
-cgitb.enable(format='txt')
+parser = optparse.OptionParser()
+parser.add_option("-d", "--debug", action="store_true", help="logging")
+options, args = parser.parse_args()
 
+logging.basicConfig()
+log = logging.getLogger()
+if options.debug:
+    log.setLevel(logging.DEBUG)
+
+cgitb.enable(format='txt')
 
 page.now = datetime.datetime.now()
 page.today = datetime.date.today()
@@ -71,13 +86,17 @@ for name, trainNumber in (
         needFetch = False
     except IOError:
         needFetch = True
+        log.debug("needFetch for %s because there is no saved info", trainNumber)
 
     if not needFetch:
         if scheduled.date() != datetime.date.today():
             needFetch = True
+            log.debug("needFetch for %s because the saved info is not for today", trainNumber)
+        else:
+            log.debug("train %s saved date is %r, today is %r, so we don't need to fetch" % (trainNumber, scheduled.date(), datetime.date.today()))
         untilScheduled = (actual or scheduled) - datetime.datetime.now()
         if datetime.timedelta(minutes=-32) < untilScheduled < datetime.timedelta(hours=1):
-            #print "%s arrives within one hour (%s)" % (trainNumber, untilScheduled)
+            log.debug("needFetch for %s because it arrives within one hour (%s)" % (trainNumber, untilScheduled))
             needFetch = True
         
     if needFetch:
@@ -86,7 +105,7 @@ for name, trainNumber in (
         except IndexError:
             scheduled, actual, isEstimate, note = NOT_RUNNING, None, False, None
 
-    #print "train %s scheduled %s %s, arrives %s (%s)" % (trainNumber, scheduled, ('true', 'estd')[isEstimate], actual, note)
+    log.debug("train %s scheduled %s %s, arrives %s (%s)" % (trainNumber, scheduled, ('true', 'estd')[isEstimate], actual, note))
 
     if not scheduled:
         try:
