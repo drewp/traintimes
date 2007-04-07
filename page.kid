@@ -32,6 +32,14 @@ div.notice {
  padding: .5em;
  font-size: 70%;
  border: 1px solid #ddd;
+
+}
+div.capitol {
+ margin: 1em;
+ padding: .5em;
+ font-size: 80%;
+ border: 2px solid #ddd;
+}
  
 }
 </style>
@@ -53,12 +61,18 @@ div.notice {
 ${XML(rowSection)}
 </table>
 
+<div class="capitol">
+The Capitol Corridor recently put up a service to view train times for any station. You can view the station selection page by clicking <a href="http://www.capitolcorridor.org/schedules/train_status/"> here.</a> We're not responsible for the information on this page, especially because it's compiled by a different method than we use.
+</div>
+
 <div class="notice">
 This is an automated site using information from Amtrak at <a href="http://tickets.amtrak.com/itd/amtrak">this search page</a>. We can't be
 held responsible for the information they provide us. This page 
 may not work all the time and may disappear completely
 without notice. Please send comments to traintimes@bigasterisk.com
 </div>
+
+
 
 </body>
 </html>
