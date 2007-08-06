@@ -62,7 +62,17 @@ ${XML(rowSection)}
 </table>
 
 <div class="capitol">
-The Capitol Corridor recently put up a service to view train times for any station. You can view the station selection page by clicking <a href="http://www.capitolcorridor.org/schedules/train_status/"> here.</a> We're not responsible for the information on this page, especially because it's compiled by a different method than we use.
+If you are a Geocacher, or are interested in Geocaching, there is a cache at the Jack London Square Amtrak Station. Please see <a
+href="http://www.geocaching.com/seek/cache_details.aspx?wp=GC14gff">the cache page</a> for more details. There is also a waymark of the
+JLS station. Please see the <a 
+href="http://www.waymarking.com/wm/details.aspx?f=1&amp;guid=642a356b-9565-4d32-b160-6a745c087476">C.L. Dellums Station</a> 
+waymark page for more information.
+ </div>
+
+<div class="capitol">
+The Capitol Corridor recently put up a service to view train times for any station. <b> Unfortunately, their page is down at the 
+moment,</b> but when it's up, you can view their station selection page by clicking 
+<a href="http://www.capitolcorridor.org/schedules/train_status/"> here.</a> We're not responsible for the information on this page, especially because it's compiled by a different method than we use.
 </div>
 
 <div class="notice">
@@ -71,8 +81,6 @@ held responsible for the information they provide us. This page
 may not work all the time and may disappear completely
 without notice. Please send comments to traintimes@bigasterisk.com
 </div>
-
-
 
 </body>
 </html>
