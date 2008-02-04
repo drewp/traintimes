@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+xmlns:py="http://genshi.edgewall.org/">
+  <head>
+    <title>next 4 trains out of ${start}</title>
+  </head>
+  <body>
+    <h1>next 4 trains out of ${start}</h1>
+    <li py:for="(trainLabel, departTime) in rows">
+      ${trainLabel} leaves at ${departTime}
+    </li>
+
+  </body>
+</html>

@@ -1,0 +1,19 @@
+@prefix : <http://traintimes.bigasterisk.com/v1#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+:Stop rdfs:comment "a stop that a train makes at a station" .
+
+:stationCode rdfs:label "code" .
+
+:trainName rdfs:label "train name" .
+
+#:scheduledArrivalTime
+#:scheduledDepartureTime
+#:actualArrivalTime
+#:actualDepartureTime
+
+:normalTrain rdfs:label "normal train"; 
+  rdfs:comment "the train object normally stops at the station subject, although it might not do so on weekends (for example)" .
+
+:contextDate rdfs:label "context date";
+  rdfs:comment "the data in the context pertains to this date (although it may have been gathered before or after the date)" .

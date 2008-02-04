@@ -11,50 +11,9 @@ import TableParse
 import kid
 kid.enable_import()
 import page
+from scrape import fetchTrainInfo
 
-def todayDateTime(s):
-    """given '4:06 pm', returns a datetime on today"""
-    t = datetime.datetime(*time.strptime(s, "%I:%M %p")[0:6])
-    return datetime.datetime.combine(datetime.date.today(), t.timetz())
     
-def fetchTrainInfo(trainNumber):
-    today = datetime.date.today()
-    t1 = time.time()
-    result = urllib.urlopen("&".join(("""http://tickets.amtrak.com/itd/amtrak?requestor=amtrak.presentation.handler.page.rail.AmtrakRailGetTrainStatusPageHandler
-xwdf_origin=sessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D%2FtravelSelection%2FjourneySelection%5B1%5D%2FdepartLocation%2Fsearch
-wdf_origin=
-xwdf_trainNumber=sessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D%2FtripRequirements%2FjourneyRequirements%5B1%5D%2FsegmentRequirements%5B1%5D%2FserviceCode
-wdf_trainNumber="""+trainNumber+"""
-xwdf_destination=sessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D%2FtravelSelection%2FjourneySelection%5B1%5D%2FdepartLocation%2Fsearch
-wdf_destination=Oakland+-+Jack+London+Sq%2C+CA+%28OKJ%29
-%2FsessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D%2FtripRequirements%2FjourneyRequirements%5B1%5D%2FdepartDate.monthyear="""+("%04d-%02d" % (today.year, today.month))+"""
-%2FsessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D%2FtripRequirements%2FjourneyRequirements%5B1%5D%2FdepartDate.day="""+("%02d" % today.day)+"""
-%2FsessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D%2FtripRequirements%2FjourneyRequirements%5B1%5D%2FdepartTime.hourmin=
-xwdf_SortBy=sessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D%2FtripRequirements%2FjourneyRequirements%5B1%5D%2FdepartDate%2F%40radioSelect
-wdf_SortBy=arrivalTime
-xwdf_SortBy=sessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D%2FtripRequirements%2FjourneyRequirements%5B1%5D%2FdepartDate%2F%40radioSelect
-_handler%3Damtrak.presentation.handler.request.rail.AmtrakRailTrainStatusSearchRequestHandler%2F_xpath%3DsessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D.x=59
-_handler%3Damtrak.presentation.handler.request.rail.AmtrakRailTrainStatusSearchRequestHandler%2F_xpath%3DsessionWorkflow%2FproductWorkflow%5B%40product%3D%27Rail%27%5D.y=21""").splitlines())).read()
-
-    log.debug("read train %s in %.3f seconds" % (trainNumber, time.time() - t1))
-
-    cells = TableParse.parse(result)
-    #pprint.pprint(list(enumerate( cells)))
-    tableNum = 35
-
-    scheduled = todayDateTime((cells[tableNum][2] or cells[tableNum][3]).splitlines()[0])
-
-    actualCell = (cells[tableNum][4] or cells[tableNum][5])
-    if actualCell:
-        actual = todayDateTime(actualCell.splitlines()[0].replace('(','').replace(')',''))
-        isEstimate = 'estimated' in actualCell
-    else:
-        actual = None
-        isEstimate = False
-
-    note = cells[tableNum][6]
-    return scheduled, actual, isEstimate, note
-
 def trainDatFile(trainNumber):
     return os.path.join(os.path.dirname(__file__), "data/train-%s.dat" % trainNumber)
 

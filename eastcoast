@@ -1,0 +1,76 @@
+#!/usr/bin/python
+import logging, datetime
+from rdflib import URIRef, Literal, RDF, RDFS
+from scrape import parseTrainStatusChoice, arriveDepartUrl
+from webfetch import fetch
+from namespaces import STATION, TRAIN, TT, XS, INITNS
+from localrdf import getGraph, addStop, addTrain, writeSubgraph
+from timejunk import literalFromAmtrakTime, literalFromDate, dateFromLiteral
+from view import next4Trains
+
+logging.basicConfig(level=logging.DEBUG)
+log = logging.getLogger()
+
+
+def addTrainsBetweenStations(graph, station1, station2,
+                             searchDate):
+    """
+    look up what trains run from station1 to station2 on searchDate,
+    and write their info a new subgraph. return url of that subgraph
+
+    searchDate is a xs:date literal like 2007-08-01
+    
+    """
+    url = arriveDepartUrl(
+        date=dateFromLiteral(searchDate),
+        origin=graph.value(station1, TT['stationCode']),
+        destination=graph.value(station2, TT['stationCode']))
+    page = fetch(url)
+    ctxURI = URIRef(url + "#context")
+    writeGraph = graph.get_context(ctxURI)
+
+    rows = parseTrainStatusChoice(page)
+
+    add = writeGraph.add
+    for (trainNum, depTime, depStation, arrTime, arrStation) in rows:
+        train = addTrain(writeGraph, trainNum)
+
+        for stn, pred, tm in [(station1, TT['scheduledDepartureTime'], depTime),
+                              (station2, TT['scheduledArrivalTime'], arrTime)]:
+            stop = addStop(graph, writeGraph, train, searchDate, stn)
+            add((stop, TT['station'], stn))
+            add((stop, TT['date'], searchDate))
+            add((stop, pred, literalFromAmtrakTime(searchDate, tm)))
+
+    add((ctxURI, RDFS.label, Literal("trains betwen %s and %s on %s" %
+                                     (graph.label(station1),
+                                      graph.label(station2),
+                                      searchDate))))
+            
+    return ctxURI
+
+graph = getGraph()
+   
+monday = datetime.date(2008,2,3)
+sub = addTrainsBetweenStations(graph, 
+                               STATION['PVD'], STATION['BOS'],
+                               literalFromDate(monday))
+writeSubgraph(graph.get_context(sub))
+
+"""
+    t:n66     :stop <http://traintimes.bigasterisk.com/carrier/amtrak/train/n66/2008-01-28/BOS>,
+                <http://traintimes.bigasterisk.com/carrier/amtrak/train/n66/2008-01-28/PVD> .
+    
+    <http://traintimes.bigasterisk.com/carrier/amtrak/train/n66/2008-01-28/BOS>     :date "2008-01-28"^^XML:date;
+         :scheduledArrivalTime "2008-01-28T07:52"^^XML:dateTime;
+         :station sta:BOS .
+    
+    <http://traintimes.bigasterisk.com/carrier/amtrak/train/n66/2008-01-28/PVD>     :date "2008-01-28"^^XML:date;
+         :scheduledDepartureTime "2008-01-28T07:04"^^XML:dateTime;
+         :station sta:PVD .
+"""
+
+
+#print webGraph.serialize(format="nt")
+
+next4Trains(graph, STATION['PVD'])

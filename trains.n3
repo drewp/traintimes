@@ -1,0 +1,46 @@
+@prefix : <http://traintimes.bigasterisk.com/v1#> .
+@prefix station: <http://traintimes.bigasterisk.com/station/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix t: <http://traintimes.bigasterisk.com/carrier/amtrak/train/> .
+
+station:PVD a :Station;
+  rdfs:label "Providence, RI (PVD)";
+  :stationCode "PVD"
+.
+
+station:BOS a :Station;
+  rdfs:label "Boston - South Station, MA (BOS)";
+  :stationCode "BOS"
+.
+
+station:OKJ a :Station;
+  rdfs:label "Oakland - Jack London Sq, CA (OKJ)";
+  :stationCode "OKJ"
+.
+
+"Capitol" is :trainName of 
+ t:n521, t:n523, t:n525, t:n527, t:n529, t:n531, t:n533, t:n535,
+ t:n537, t:n541, t:n543, t:n545, t:n547, t:n549, t:n551, t:n553,
+ t:n723, t:n727, t:n729, t:n733, t:n737, t:n741, t:n743, t:n745,
+ t:n747, t:n749, t:n751, t:n720, t:n724, t:n728, t:n732, t:n734,
+ t:n736, t:n738, t:n742, t:n744, t:n746, t:n748, t:n518, t:n520,
+ t:n522, t:n524, t:n526, t:n528, t:n530, t:n532, t:n534, t:n536,
+ t:n538, t:n540, t:n542, t:n544, t:n546, t:n548 .
+
+"San Joaquin" is :trainName of 
+ t:n711, t:n701, t:n713, t:n715, t:n717, t:n703, t:n702, t:n712,
+ t:n714, t:n716, t:n704, t:n718 .
+
+"Coast Starlight" is :trainName of 
+ t:n11, t:n14 .
+
+station:OKJ :normalTrain
+ t:n521, t:n523, t:n525, t:n527, t:n529, t:n531, t:n533, t:n535,
+ t:n537, t:n541, t:n543, t:n545, t:n547, t:n549, t:n551, t:n553,
+ t:n723, t:n727, t:n729, t:n733, t:n737, t:n741, t:n743, t:n745,
+ t:n747, t:n749, t:n751, t:n720, t:n724, t:n728, t:n732, t:n734,
+ t:n736, t:n738, t:n742, t:n744, t:n746, t:n748, t:n518, t:n520,
+ t:n522, t:n524, t:n526, t:n528, t:n530, t:n532, t:n534, t:n536,
+ t:n538, t:n540, t:n542, t:n544, t:n546, t:n548, t:n711, t:n701,
+ t:n713, t:n715, t:n717, t:n703, t:n702, t:n712, t:n714, t:n716,
+ t:n704, t:n718, t:n11, t:n14 .
