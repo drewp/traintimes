@@ -5,7 +5,7 @@ from scrape import parseDepartureArrivalInfo, arriveDepartUrl
 from webfetch import fetch
 from namespaces import STATION, TRAIN, TT, XS, DC
 from localrdf import getGraph, addStop, addTrain, writeSubgraph
-from timejunk import literalFromAmtrakTime, dateFromLiteral
+from timejunk import literalFromAmtrakTime, dateFromLiteral, literalToday
 from view import trainsToday
 
 logging.basicConfig(level=logging.DEBUG)
@@ -96,7 +96,7 @@ def addTrainsAtStation(graph, station, searchDate):
 
 if __name__ == '__main__':
     graph = getGraph()
-    searchDate = Literal("2008-02-03", datatype=XS['date'])
+    searchDate = literalToday()
 
     if 1:
         addTrainsAtStation(graph, STATION['OKJ'], searchDate)
