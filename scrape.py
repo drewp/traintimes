@@ -2,9 +2,12 @@
 import logging, optparse, urllib, time, datetime, pprint, pickle, os, cgitb, re
 import TableParse
 from BeautifulSoup import BeautifulSoup
+import BeautifulSoup as bsoupmod
 from timejunk import todayDateTime
 from rdflib import URIRef
 log = logging.getLogger()
+
+log.info("BeautifulSoup version %s", bsoupmod.__version__)
 
 def fetchTrainInfo(trainNumber):
     return fetchTrainInfo2(trainNumber, destination="OKJ")

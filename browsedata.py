@@ -1,6 +1,9 @@
 #!/usr/bin/python
 import logging, sys, inspect
 
+logging.basicConfig(level=logging.DEBUG)
+log = logging.getLogger()
+
 #sys.path.append("rdflib/rdf/build/lib")
 #from rdf.plugins import register
 #register('rdf.IOMemory', 
@@ -25,8 +28,6 @@ from okj import addTrainsAtStation
 
 from serverdf import RdfXMLPage
 
-logging.basicConfig(level=logging.DEBUG)
-log = logging.getLogger()
 
 
 class Main(rend.Page):

@@ -1,5 +1,8 @@
 #!/usr/bin/python
 import logging
+logging.basicConfig(level=logging.DEBUG)
+log = logging.getLogger()
+
 from rdflib import URIRef, Literal, RDF, RDFS
 from scrape import parseDepartureArrivalInfo, arriveDepartUrl
 from webfetch import fetch
@@ -8,8 +11,6 @@ from localrdf import getGraph, addStop, addTrain, writeSubgraph
 from timejunk import literalFromAmtrakTime, dateFromLiteral, literalToday
 from view import trainsToday
 
-logging.basicConfig(level=logging.DEBUG)
-log = logging.getLogger()
 
 
 def needsReload(graph, train, station, searchDate):
