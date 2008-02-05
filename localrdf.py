@@ -80,3 +80,15 @@ def allGraphs(date):
             label = "(no label provided)"
         g.parse(filename, format=SUBGRAPH_FORMAT)
     return g
+
+def readSubgraph(graph, ctxURI):
+    """read stmts from ctxURI into graph, if we have any on disk"""
+    filename = filenameFromURI(ctxURI)
+    for dateDir in os.listdir("graph"):
+        f = "graph/%s/%s" % (dateDir, filename)
+        if os.path.exists(f):
+            print "readSubgraph adds", f
+            graph.parse(f, format=SUBGRAPH_FORMAT, publicID=ctxURI)
+
+        
+    

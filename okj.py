@@ -11,6 +11,21 @@ from view import trainsToday
 logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger()
 
+
+def needsReload(graph, train, station, searchDate):
+    """would we expect that the data on this train is updating, such
+    that the source page needs to be refetched?
+
+    please load into graph any contexts that might contain info about
+    this train's schedule at the given station.
+
+    previous version said:
+        untilScheduled = (actual or scheduled) - datetime.datetime.now()
+        if datetime.timedelta(minutes=-32) < untilScheduled < datetime.timedelta(hours=1):
+            reload
+    """
+    return True
+
 def addTrainInfo(graph, train, searchDate, station):
     """look up this train and write statements to a new subgraph.
     Returns url of the subgraph I wrote to
@@ -24,8 +39,11 @@ def addTrainInfo(graph, train, searchDate, station):
     ctxURI = URIRef(url + "#context")
     webGraph = graph.get_context(ctxURI)
     webGraph.add((ctxURI, TT['contextDate'], searchDate))
+
+    oldGraph = graph # needs old ctx data
     
-    page, pageTime = fetch(url)
+    page, pageTime = fetch(url, useCache=not needsReload(graph, train,
+                                                         station, searchDate))
     webGraph.add((ctxURI, TT['fetchTime'], pageTime))
     try:
         (trainNum, parsedStation, scheduledArr, scheduledDep, actualArr,
