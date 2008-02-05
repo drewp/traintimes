@@ -1,7 +1,9 @@
 #!/usr/bin/python
-import logging
+import logging, sys
 logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger()
+
+sys.path.append("ext")
 
 from rdflib import URIRef, Literal, RDF, RDFS
 from scrape import parseDepartureArrivalInfo, arriveDepartUrl

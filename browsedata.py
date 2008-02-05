@@ -4,6 +4,8 @@ import logging, sys, inspect
 logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger()
 
+sys.path.append("ext")
+
 #sys.path.append("rdflib/rdf/build/lib")
 #from rdf.plugins import register
 #register('rdf.IOMemory', 
