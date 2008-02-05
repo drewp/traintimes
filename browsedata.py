@@ -99,5 +99,5 @@ class GraphPage(rend.Page):
 
 
 tlog.startLogging(sys.stdout)
-reactor.listenTCP(8011, NevowSite(Main()))
+reactor.listenTCP(8008, NevowSite(Main()))
 reactor.run()
