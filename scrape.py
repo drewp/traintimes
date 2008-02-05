@@ -7,6 +7,7 @@ from timejunk import todayDateTime
 from rdflib import URIRef
 log = logging.getLogger()
 
+# something in the code needs greater than version 2
 log.info("BeautifulSoup version %s", bsoupmod.__version__)
 
 def fetchTrainInfo(trainNumber):
