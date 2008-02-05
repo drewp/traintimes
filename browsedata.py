@@ -4,7 +4,7 @@ import logging, sys, inspect
 logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger()
 
-sys.path.append("ext")
+sys.path.insert(0, "ext")
 
 #sys.path.append("rdflib/rdf/build/lib")
 #from rdf.plugins import register

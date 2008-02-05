@@ -3,7 +3,7 @@ import logging, sys
 logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger()
 
-sys.path.append("ext")
+sys.path.insert(0, "ext")
 
 from rdflib import URIRef, Literal, RDF, RDFS
 from scrape import parseDepartureArrivalInfo, arriveDepartUrl
